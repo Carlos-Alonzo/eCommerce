@@ -17,17 +17,15 @@ import static org.mockito.Mockito.when;
 
 public class UserControllerTest
 {
-
 	private UserController userController;
-	private UserRepository userRepo = mock(UserRepository.class); //mocking the User repository class
-	private CartRepository cartRepo = mock(CartRepository.class); //mocking the Cart repository class
+	private UserRepository userRepo = mock(UserRepository.class);
+	private CartRepository cartRepo = mock(CartRepository.class);
 	private BCryptPasswordEncoder encoder = mock(BCryptPasswordEncoder.class);
 
 	@Before
 	public void setUp()
 	{
 		userController = new UserController();
-		//reason for these injections is because these are object required for a userController
 		TestUtils.injectObjects(userController, "userRepository", userRepo);
 		TestUtils.injectObjects(userController, "cartRepository", cartRepo);
 		TestUtils.injectObjects(userController, "bCryptPasswordEncoder", encoder);
