@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -20,7 +19,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "user_order")
-public class UserOrder {
+public class UserOrder
+{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,11 +75,11 @@ public class UserOrder {
 	}
 
 	public static UserOrder createFromCart(Cart cart) {
-		UserOrder order = new UserOrder();
-		order.setItems(cart.getItems().stream().collect(Collectors.toList()));
-		order.setTotal(cart.getTotal());
-		order.setUser(cart.getUser());
-		return order;
+		UserOrder userOrder = new UserOrder();
+		userOrder.setItems(cart.getItems().stream().collect(Collectors.toList()));
+		userOrder.setTotal(cart.getTotal());
+		userOrder.setUser(cart.getUser());
+		return userOrder;
 	}
 	
 }

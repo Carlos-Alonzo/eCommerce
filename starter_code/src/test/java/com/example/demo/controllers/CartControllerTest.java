@@ -75,4 +75,26 @@ public class CartControllerTest
 		assertEquals("Carlos", cart.getUser().getUsername());
 		assertEquals(3, cart.getItems().size());
 	}
+
+	@Test
+	public void RemoveFromCartTest() throws Exception
+	{
+		//stubbing
+		when(userRepo.findByUsername("Carlos")).thenReturn(testUser);
+		when(itemRepo.findById(1l)).thenReturn(java.util.Optional.ofNullable(testItem));
+
+		ModifyCartRequest modifyCartRequest = new ModifyCartRequest();
+		modifyCartRequest.setUsername(testUser.getUsername());
+		modifyCartRequest.setItemId(testItem.getId());
+		modifyCartRequest.setQuantity(3);
+
+		final ResponseEntity<Cart> cartResponse = cartController.removeFromcart(modifyCartRequest);
+
+		assertNotNull(cartResponse);
+		assertEquals(200, cartResponse.getStatusCodeValue());
+		Cart cart = cartResponse.getBody();
+		assertNotNull(cart);
+		assertEquals(0, cart.getItems().size());
+	}
+
 }

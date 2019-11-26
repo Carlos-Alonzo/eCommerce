@@ -44,7 +44,7 @@ and this would return
 
 
 Exercise:
-Once you've created a user, try  to add items to cart (see the `ModifyCartRequest` class) and submit an order. 
+Once you've created a user, try  to add items to cart (see the `ModifyCartRequest` class) and submit an userOrder. 
 
 ## Adding Authentication and Authorization
 We need to add proper authentication and authorization controls so users can only access their data, and that data can only be accessed in a secure way. We will do this using a combination of usernames and passwords for authentication, as well as JSON Web Tokens (JWT) to handle the authorization.
