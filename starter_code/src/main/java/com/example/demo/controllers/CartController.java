@@ -25,7 +25,10 @@ import com.example.demo.model.requests.ModifyCartRequest;
 @RequestMapping("/api/cart")
 public class CartController
 {
-	private Logger log = LoggerFactory.getLogger(CartController.class);
+	private Logger logger = LoggerFactory.getLogger("splunk.logger");
+
+
+    private Logger log = LoggerFactory.getLogger(CartController.class);
 
 	@Autowired
 	private UserRepository userRepository;
@@ -39,6 +42,10 @@ public class CartController
 	@PostMapping("/addToCart")
 	public ResponseEntity<Cart> addTocart(@RequestBody ModifyCartRequest request)
 	{
+		logger.info("This is a test");
+		logger.info("This is a test event for Logback test");
+		logger.error("This is a test error for Logback test");
+
 		User user = userRepository.findByUsername(request.getUsername());
 		if(user == null)
 		{
