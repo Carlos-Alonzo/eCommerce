@@ -1,6 +1,7 @@
 package com.example.demo.security;
 
 import com.auth0.jwt.JWT;
+import com.example.demo.logging.LogSendRequest;
 import com.example.demo.model.persistence.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -24,17 +25,21 @@ import static com.example.demo.security.SecurityConstants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter
 {
+	private LogSendRequest splunkEventLogger;
 	private AuthenticationManager authenticationManager;
 	private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
 
-	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) { 		this.authenticationManager = authenticationManager; }
+	public JWTAuthenticationFilter(AuthenticationManager authenticationManager)
+	{
+		this.authenticationManager = authenticationManager;
+//		splunkEventLogger = new LogSendRequest();
+	}
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res) throws AuthenticationException
 	{
 		try
 		{
-			log.info("attempting to authenticate user");
 			User creds = new ObjectMapper().readValue(req.getInputStream(), User.class);
 			return authenticationManager.authenticate( new UsernamePasswordAuthenticationToken(creds.getUsername(), creds.getPassword(), new ArrayList<>()));
 		}
@@ -44,10 +49,21 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) throws IOException, ServletException
 	{
+		splunkEventLogger = new LogSendRequest("Successful login attempt", this.getClass().getName());
+		splunkEventLogger.executePost();
+
 		String token = JWT.create()
 				               .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
 				               .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
 				               .sign(HMAC512(SECRET.getBytes()));
 		res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
+	}
+
+	@Override
+	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException
+	{
+		splunkEventLogger = new LogSendRequest("Unsuccessful login attempt", this.getClass().getName());
+		splunkEventLogger.executePost();
+		super.unsuccessfulAuthentication(request, response, failed);
 	}
 }
