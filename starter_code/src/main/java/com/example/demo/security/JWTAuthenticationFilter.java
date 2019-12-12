@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.example.demo.logging.LogSendRequest;
 import com.example.demo.model.persistence.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -49,8 +50,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) throws IOException, ServletException
 	{
-		splunkEventLogger = new LogSendRequest("Successful login attempt", this.getClass().getName());
-		splunkEventLogger.executePost();
+		splunkEventLogger = new LogSendRequest("Successful login attempt: "+ this.getClass().getName());
+		HttpResponse logResponse= splunkEventLogger.executePost();
+		log.info("Successful Login Log send request response code: "
+				+ logResponse.getStatusLine().getStatusCode()
+				+ ": "
+				+ logResponse.getStatusLine().getReasonPhrase());
 
 		String token = JWT.create()
 				               .withSubject(((org.springframework.security.core.userdetails.User) auth.getPrincipal()).getUsername())
@@ -62,8 +67,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException
 	{
-		splunkEventLogger = new LogSendRequest("Unsuccessful login attempt", this.getClass().getName());
-		splunkEventLogger.executePost();
+		splunkEventLogger = new LogSendRequest("Unsuccessful login attempt: "+ this.getClass().getName());
+		HttpResponse logResponse= splunkEventLogger.executePost();
+		log.info("Unsuccessful Login Log send request response code: "
+				+ logResponse.getStatusLine().getStatusCode()
+				+ ": "
+				+ logResponse.getStatusLine().getReasonPhrase());
 		super.unsuccessfulAuthentication(request, response, failed);
 	}
 }

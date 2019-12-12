@@ -1,71 +1,28 @@
 package com.example.demo.logging;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class LogSendRequest
 {
 	private static final String URL= "https://api.scp.splunk.com/ecomm/ingest/v1beta2/events";
-	private static final String TOKEN = "Bearer IACuj_MNUYk6PST-zc2Ws7ya2Qi2uYcKhSEqxRcAxrUOGH5vWyKySiu44ujVuA5WEeGSTXXRZeN_2yZzJSt7GdBC8aM5yf3VccbkHUPrnHKcJMElITV2OUFpZx6WiSiTBgZjcqaQrfhU55_jrUnMAjFIhNAO-OV_qGTh-n_aCUHQEfZTotby3uzoCMyqBcWEXwpk0PuGHSGgYvS5CH-C4qWiTFZKnKBBxyhJT1Jl8OWgv7GrH0fr6GQ9Jz0914zM_6D6QwMn6JbvR6eOSFCN3sq_QTL6ISesj-277xSpEo2emsns1tWunvA4Gx4ExPeg9W65LCbRRORNSslxBuXIVeQqru9BGfz4V1fJ_rVnM6UcrxgFOf2hR-nckNva5buTAIMReYQli4RI3oy7TNUjUuvJva7FpjB8XEnJfDY3FwmUp082xW9mDNhIRXFV52zBHqRvH7c_hFvmnZuOVLFV1z9kAN1b_0mJ8ET3s23jmn2_kBlku5ITlKuCWXLOUVICwdZnvRD3KkdfXm69Mh0mZc5G2C7Rl3DsN6im9hQjTLPDD7uxbk-sNALfV5zrYMdAU15xVTP3tycpemjGV0tqBRmNBu8PaxxIOit9g8_4dhmRAeDoW_ONke95nqD7-n0B412qbfSqYrG6wO6tU35OnKzpt5Kru_IUBN8P6fz6VzFD60T2ssuTdnfB7js0knoXe5AXpItqZYlQVZvX8gJbX6pzucuV4r3k05OMndol3mZA3JavyRwJNvAvNTFeREsWOTGOcynxzluTS6V0YRUrCl2j1DJfY8Ho-aruGBMcyRaLx5_gJ8SwlUeyCpROHxiZXlZz-Zr1kfjBwjVBMNhAmLtYPH7e2ghGOoGWhI2lxzDi0UBasL-NBDTDSZ1KaSIf7MulWQVlUX1uCBH6NxUmBZ4Dzv1lXedrIN5VnjUE8bdLDFvM_DyCWcft4-TMM9EXdMV0iYEHNsqSrk1We8evFn88wCi-0Ydtxf9OZc1ifp7E4Xvnz0xYUvaIAP-VaxZjXL30GVX8-czQxeokKGQfjQRJ5VXQ7Qd-_OG9yqKqKBflFC5MNaEB732WagZuK8KB4EfdZFqdi2bRXIz7Hn1MrIk176KS9rpOxnub3x2xEj2qlANRJbuFSyaxp_orPPxYQlaF2DyFbxxX5_sSQ";
-	private static final String[] Fields = {"id", "host", "source", "source_type", "body"};
-	private List<NameValuePair> requestBody;
-	private HttpClient httpClient;
+	private static final String TOKEN = "Bearer IACxaMDBcOPj7kMmcBfgG-EDLWyEehiDdjnTPdJLj7VGFu-PzrSxFKSIIwHXLzkEoQ11jLA8Ex5wm3f_qzOEjsXavl-VI-XUNyNzol_DfbFQIIUAw638lXQf1EKnylhYWmq3xmeEAnFML_FI3qp8T3c7uACNuLpcgivUJdd7wWlfnKQWYMjENw3Ol3xbYKjoqYhnX8XvGyVeWmVNpIZF-zbMRnyAilq0tdph2HH8WUsEAC_hr8R2z326b4N05b1GIuq9Zp2jE-dJ5SorvqRmi5JW-Qi8OOqcNVzUWUpmFb-cV1ngPBwhNT6u8XkOS3coqF5y68GzYtTW8kT1JCMoHMptwcdpax1jorS4NXRmmRXIlLLjUJZAngPUKYK_5i3pBsHPthAniaOSL5Fhj3wONgXBMPuf6Q_i9GYvjXmSaGmtWN_o5j6WgdSegeYm3AP-LVVjsGxvmVdszNhId2eY3JsR4i4CRutLhbQaMbdfRDraH8roCxOQhflm0kLdEsJhVFg1uSM8LRx6AR-JuQOJ-qDGBN0oJQztxH3hS_ybT3-y9VGi5_pL_9nKxdIyH0dFyLrNif4jeoazl5my3Xp8vf5_Y6hCSBVo-VKmo6KTOCV8HYdZQjrt4w9qskNpBGgb13PIalNpmN1TkmYd35FJkdAWgsXYVjTXHj9xwgPkxdw2EF20zbV3np8Ysq1Z7eWgLWFDfez05IqITmIvcvXhwC0o2dbrGgU8coPo2qQoZbWzo3_09gIh7ZEhxTic6_zkTD6eIAr7MV8jJXXuupHZJqvi2bkRBx7731v8-UfwHMonjvRYc-xRbwa1mt47J5OMVmGv8b7lWQ6cGP5-NSrj3PnqTR5BHhOkQYZ7LGwMrcphwseiK7p9ynv__UtymEPZZTXx7ZE84xlL-Rh5ctZJJBjaNdwELNTade30sMW2naONhPNzRjTJlyRKAY-zfSfi3Fs94hSD1hv7Eb_EzkhAXJ5kzWlzCBih1yMqaryJrU9elfPNSWscdzPeL3R2t69cTYDifM-4UD1UjGeN-EbJ1UtAaJ4VuzJk8qS8bUj3BJkAhhN7LkkGM-AzvCQ6DeQg1-8EDj_jIVi8KAxMzHViNylBZzViprlUaAng4ElYAQp8tEtkdsTHJEkq8eupVUts5RZDI5Mj0BMi-gLjA ";
+	private CloseableHttpClient httpClient;
 	private HttpPost httpPost;
-//	private HttpResponse;
 
-//	public void LogSendRequest() throws UnsupportedEncodingException, UnknownHostException
-//	{
-//		requestBody = new ArrayList<>();
-//		requestBody.add(new BasicNameValuePair("id", new Timestamp(System.currentTimeMillis()).toString()));
-//		requestBody.add(new BasicNameValuePair("host", InetAddress.getLocalHost().toString()));
-//		requestBody.add(new BasicNameValuePair("source_type", "app.class name"));
-//
-//		httpClient = HttpClients.createDefault();
-//		httpPost = new HttpPost(URL);
-//		httpPost.setEntity(new UrlEncodedFormEntity(requestBody, "UTF-8"));
-//	}
-
-
-	public LogSendRequest(String body, String source) throws UnknownHostException, UnsupportedEncodingException
+	public LogSendRequest(String body) throws IOException
 	{
-		requestBody = new ArrayList<>();
-		requestBody.add(new BasicNameValuePair("id", new Timestamp(System.currentTimeMillis()).toString()));
-		requestBody.add(new BasicNameValuePair("host", InetAddress.getLocalHost().toString()));
-		requestBody.add(new BasicNameValuePair("source", source));
-		requestBody.add(new BasicNameValuePair("body", body));
-		requestBody.add(new BasicNameValuePair("source_type", "app.class name"));
 		httpClient = HttpClients.createDefault();
 		httpPost = new HttpPost(URL);
-		httpPost.addHeader("Content-Type", "application/json");
 		httpPost.addHeader("Authorization", TOKEN);
-		httpPost.setEntity(new Entity(requestBody, "UTF-8"));
+		httpPost.addHeader("Content-Type", "application/json");
+		httpPost.setEntity(new StringEntity("[{\"body\":\"" + body +"\"}]"));
 	}
-
-	public void setBodyString(String bodyString)
-	{
-		requestBody.add(new BasicNameValuePair("body", bodyString));
-	}
-
-	public void setSourceString(String sourceString)
-	{
-		requestBody.add(new BasicNameValuePair("body", sourceString));
-	}
-
 
 	public HttpResponse executePost() throws IOException
 	{
