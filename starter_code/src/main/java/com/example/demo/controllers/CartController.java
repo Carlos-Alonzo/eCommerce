@@ -25,10 +25,10 @@ import com.example.demo.model.requests.ModifyCartRequest;
 @RequestMapping("/api/cart")
 public class CartController
 {
-	private Logger logger = LoggerFactory.getLogger("splunk.logger");
-
-
-    private Logger log = LoggerFactory.getLogger(CartController.class);
+//	private Logger logger = LoggerFactory.getLogger("splunk.logger");
+//
+//
+//    private Logger log = LoggerFactory.getLogger(CartController.class);
 
 	@Autowired
 	private UserRepository userRepository;
@@ -42,21 +42,21 @@ public class CartController
 	@PostMapping("/addToCart")
 	public ResponseEntity<Cart> addTocart(@RequestBody ModifyCartRequest request)
 	{
-		logger.info("This is a test");
-		logger.info("This is a test event for Logback test");
-		logger.error("This is a test error for Logback test");
+//		logger.info("This is a test");
+//		logger.info("This is a test event for Logback test");
+//		logger.error("This is a test error for Logback test");
 
 		User user = userRepository.findByUsername(request.getUsername());
 		if(user == null)
 		{
-			log.error("Cart request did not find such user", request.getUsername() );
+//			log.error("Cart request did not find such user", request.getUsername() );
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Optional<Item> item = itemRepository.findById(request.getItemId());
 
 		if(!item.isPresent())
 		{
-			log.error("Item was not found", request.getItemId());
+//			log.error("Item was not found", request.getItemId());
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 		Cart cart = user.getCart();

@@ -7,6 +7,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 public class LogSendRequest
 {
@@ -15,6 +16,13 @@ public class LogSendRequest
 	private CloseableHttpClient httpClient;
 	private HttpPost httpPost;
 
+	public LogSendRequest()
+	{
+		httpClient = HttpClients.createDefault();
+		httpPost = new HttpPost(URL);
+		httpPost.addHeader("Authorization", TOKEN);
+		httpPost.addHeader("Content-Type", "application/json");
+	}
 	public LogSendRequest(String body) throws IOException
 	{
 		httpClient = HttpClients.createDefault();
@@ -24,6 +32,10 @@ public class LogSendRequest
 		httpPost.setEntity(new StringEntity("[{\"body\":\"" + body +"\"}]"));
 	}
 
+	public void  setBody(String body) throws UnsupportedEncodingException
+	{
+		httpPost.setEntity(new StringEntity("[{\"body\":\"" + body +"\"}]"));
+	}
 	public HttpResponse executePost() throws IOException
 	{
 		return httpClient.execute(httpPost);

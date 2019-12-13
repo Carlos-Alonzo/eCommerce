@@ -26,7 +26,7 @@ import static com.example.demo.security.SecurityConstants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter
 {
-	private LogSendRequest splunkEventLogger;
+	private static final LogSendRequest splunkEventLogger = new LogSendRequest();
 	private AuthenticationManager authenticationManager;
 	private static final Logger log = LoggerFactory.getLogger(JWTAuthenticationFilter.class);
 
@@ -50,7 +50,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain, Authentication auth) throws IOException, ServletException
 	{
-		splunkEventLogger = new LogSendRequest("Successful login attempt: "+ this.getClass().getName());
+		splunkEventLogger.setBody("Successful login attempt: "+ this.getClass().getName());
 		HttpResponse logResponse= splunkEventLogger.executePost();
 		log.info("Successful Login Log send request response code: "
 				+ logResponse.getStatusLine().getStatusCode()
@@ -67,7 +67,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException
 	{
-		splunkEventLogger = new LogSendRequest("Unsuccessful login attempt: "+ this.getClass().getName());
+		splunkEventLogger.setBody("Unsuccessful login attempt: "+ this.getClass().getName());
 		HttpResponse logResponse= splunkEventLogger.executePost();
 		log.info("Unsuccessful Login Log send request response code: "
 				+ logResponse.getStatusLine().getStatusCode()

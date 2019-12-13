@@ -2,6 +2,11 @@ package com.example.demo.security;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.example.demo.logging.LogSendRequest;
+import org.apache.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,12 +17,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import static com.example.demo.security.SecurityConstants.*;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter
 {
+	private LogSendRequest splunkEventLogger = new LogSendRequest();
+	private static final Logger log = LoggerFactory.getLogger(JWTAuthorizationFilter.class);
 
 	public JWTAuthorizationFilter(AuthenticationManager authManager) {
 		super(authManager);
@@ -39,17 +47,29 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter
 		chain.doFilter(req, res);
 	}
 
-	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request)
+	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) throws JWTDecodeException, IOException
 	{
+		String user=null;
 		String token = request.getHeader(HEADER_STRING);
 		if (token != null)
 		{
 			// parse the token.
-			String user = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
-					              .build()
-					              .verify(token.replace(TOKEN_PREFIX, ""))
-					              .getSubject();
-
+			try
+			{
+				user = JWT.require(Algorithm.HMAC512(SECRET.getBytes()))
+						              .build()
+						              .verify(token.replace(TOKEN_PREFIX, ""))
+						              .getSubject();
+			}
+			catch (JWTDecodeException e)
+			{
+				splunkEventLogger.setBody("Failed to decode JWT Provided: "+ this.getClass().getName());
+				HttpResponse logResponse= splunkEventLogger.executePost();
+				log.info("JWT Decode Failure event log to splunk response: "
+						         + logResponse.getStatusLine().getStatusCode()
+						         + ": "
+						         + logResponse.getStatusLine().getReasonPhrase());
+			};
 			if (user != null) { return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>()); 			}
 			return null;
 		}
